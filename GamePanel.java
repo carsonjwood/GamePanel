@@ -56,6 +56,8 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     private long lastSpawnTime = 0;
     private boolean gameOver = false;
     private JButton resetButton;
+    private int spawnRate = 1;
+    private long lastIncreaseTime = 0;
 
     public GamePanel() {
         setPreferredSize(new Dimension(800, 600));
@@ -192,8 +194,15 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastSpawnTime >= 3000) {
-            spawnEnemy();
+            for (int i = 0; i < spawnRate; i++) {
+                spawnEnemy();
+            }
             lastSpawnTime = currentTime;
+        }
+
+        if (currentTime - lastIncreaseTime >= 15000) {
+            spawnRate++;
+            lastIncreaseTime = currentTime;
         }
     }
 
