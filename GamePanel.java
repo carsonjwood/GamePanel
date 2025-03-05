@@ -54,7 +54,6 @@ class Room {
         return new Rectangle(x, y, width, height).contains(playerBounds);
     }
     
-
     public ArrayList<Rectangle> getWalls() {
         return walls;
     }
@@ -192,7 +191,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
     private int spawnRate = 1;
     private long lastIncreaseTime = 0;
     private ArrayList<Rectangle> corridors;
-  //  private Rectangle wallTop, wallBottom;
     private int score = 0;
     private String currentWeapon = "Pistol";
     private HospitalMap hospitalMap;
@@ -225,9 +223,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         resetButton.setVisible(false);
         add(resetButton);
 
-      //  wallTop = new Rectangle(250, 250, 300, 20);
-      //  wallBottom = new Rectangle(250, 330, 300, 20);
-        
         repaint();
     }
 
@@ -331,10 +326,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 
         g2d.setColor(Color.GREEN);
         g2d.fillRect(10, 10, health * 40, 10); // Health bar
-
-       // g2d.setColor(Color.GRAY);
-       // g2d.fillRect(wallTop.x, wallTop.y, wallTop.width, wallTop.height); // Top line of '='
-       // g2d.fillRect(wallBottom.x, wallBottom.y, wallBottom.width, wallBottom.height); // Bottom line of '='
     }
 
     private void updateGame() {
@@ -359,27 +350,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
                 }
             }
         }
-        
-        /*if (collision) {
-            if (up) newY += speed;
-            if (down) newY -= speed;
-            if (left) newX += speed;
-            if (right) newX -= speed;
-        } 
-        
-        playerX = newX;
-        playerY = newY; */
-
-        /* 
-        if (collision) {
-            if (up) down = true; up = false;
-            if (down) up = true; down = false;
-            if (left) right = true; left = false;
-            if (right) left = true; right = false;
-        } else {
-            playerX = newX;
-            playerY = newY;
-        } */
 
         for (Enemy enemy : enemies) {
             enemy.moveTowards(playerX, playerY, hospitalMap.getRooms(), hospitalMap.getCorridors());
@@ -388,13 +358,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
         for (Bullet bullet : bullets) { //Bullets
             bullet.move();
         }
-
-        bullets.removeIf(bullet -> {
-            bullet.move();
-            return rooms.stream().anyMatch(room -> 
-                room.getWalls().stream().anyMatch(wall -> wall.intersects(bullet.getBounds()))
-            );
-        }); 
 
         bullets.removeIf(bullet -> bullet.x < 0 || bullet.x > 800 || bullet.y < 0 || bullet.y > 600);
         
@@ -427,11 +390,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
                     score += 10;
                     enemyIterator.remove();
                 }
-
-             //   if ((enemy.x < wallTop.x + wallTop.width && enemy.x + 20 > wallTop.x && enemy.y < wallTop.y + wallTop.height && enemy.y + 20 > wallTop.y) ||
-             //   (enemy.x < wallBottom.x + wallBottom.width && enemy.x + 20 > wallBottom.x && enemy.y < wallBottom.y + wallBottom.height && enemy.y + 20 > wallBottom.y)) {
-             //   enemyIterator.remove(); // Stop enemies from passing through the walls
-           // }
         }
             
             Iterator<Bullet> bulletIterator = bullets.iterator();
@@ -444,6 +402,15 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
                     enemyIterator.remove();
                     score += 10; // Increase score when an enemy is killed
                     break;
+                }
+
+                for (Room room : rooms) {
+                    for (Rectangle wall : room.getWalls()) {
+                        if (wall.intersects(bullet.getBounds())) {
+                            bulletIterator.remove(); // Remove bullet safely
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -461,7 +428,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
             lastIncreaseTime = currentTime;
         }
     }
-
 
     private void spawnEnemy() {
         int edge = random.nextInt(4);
